@@ -19,7 +19,6 @@ public class UrlController {
 
     @PostMapping("/shorten")
     public ResponseEntity<String> shortenUrl(@RequestBody UrlRequest urlRequest) {
-
         if(urlRequest == null || urlRequest.getOriginalUrl().isEmpty()) return ResponseEntity.badRequest()
                 .body("Bad request");
         String shortUrl = urlService.shortenUrl(urlRequest.getOriginalUrl());

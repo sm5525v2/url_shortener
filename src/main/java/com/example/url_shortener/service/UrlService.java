@@ -18,6 +18,10 @@ public class UrlService {
     private static final int BASE = BASE62.length();
 
     public String shortenUrl(String originalUrl) {
+        if(urlRepository.existsByOriginalUrl(originalUrl)) {
+            String shortUrl = urlRepository.findByOriginalUrl(originalUrl).orElseThrow().getShortUrl();
+            return shortUrl;
+        }
         //TODO: get id from snowflake
         long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
         String shortUrl = encode(id);

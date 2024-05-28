@@ -10,5 +10,9 @@ import java.util.Optional;
 @Repository
 public interface UrlRepository extends CassandraRepository<Url, Long> {
     Optional<Url> findByShortUrl(String shortUrl);
+
+    boolean existsByOriginalUrl(String originalUrl);
+
+    Optional<Url> findByOriginalUrl(String originalUrl);
 }
 
