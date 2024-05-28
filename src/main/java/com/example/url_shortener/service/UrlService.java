@@ -3,8 +3,11 @@ package com.example.url_shortener.service;
 import com.example.url_shortener.model.Url;
 import com.example.url_shortener.repository.UrlRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -13,27 +16,49 @@ public class UrlService {
     @Autowired
     private UrlRepository urlRepository;
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     private static final String URL_CACHE_PREFIX = "URL_";
     private static final String BASE62 = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     private static final int BASE = BASE62.length();
 
     public String shortenUrl(String originalUrl) {
-        if(urlRepository.existsByOriginalUrl(originalUrl)) {
-            String shortUrl = urlRepository.findByOriginalUrl(originalUrl).orElseThrow().getShortUrl();
-            return shortUrl;
+
+        //check redis cache first
+        String shortUrl = (String) redisTemplate.opsForValue().get(URL_CACHE_PREFIX + originalUrl);
+        if(shortUrl == null) {
+            System.out.println("not in cache");
+
+            //check cassandra DB
+            Optional<Url> existingUrl = urlRepository.findByOriginalUrl(originalUrl);
+
+            if (!existingUrl.isPresent()) {
+                //TODO: get id from snowflake
+                long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
+                String newShortUrl = encode(id);
+                Url Url = new Url(id, originalUrl, newShortUrl);
+                urlRepository.save(Url);
+                redisTemplate.opsForValue().set(URL_CACHE_PREFIX + newShortUrl, originalUrl, Duration.ofMinutes(60));
+                redisTemplate.opsForValue().set(URL_CACHE_PREFIX + originalUrl, newShortUrl, Duration.ofMinutes(60));
+                return newShortUrl;
+            }
+            shortUrl = existingUrl.get().getShortUrl();
         }
-        //TODO: get id from snowflake
-        long id = UUID.randomUUID().getMostSignificantBits() & Long.MAX_VALUE;
-        String shortUrl = encode(id);
-        Url Url = new Url(id, originalUrl, shortUrl);
-        urlRepository.save(Url);
+        redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, originalUrl, Duration.ofMinutes(60));
+        redisTemplate.opsForValue().set(URL_CACHE_PREFIX + originalUrl, shortUrl, Duration.ofMinutes(60));
         return shortUrl;
     }
 
     public String getOriginalUrl(String shortUrl) {
-        long id = decode(shortUrl);
-        String originalUrl = urlRepository.findById(id).orElseThrow().getOriginalUrl();
-
+        String originalUrl = (String) redisTemplate.opsForValue().get(URL_CACHE_PREFIX + shortUrl);
+        if(originalUrl == null) {
+            long id = decode(shortUrl);
+            originalUrl = urlRepository.findById(id).orElseThrow().getOriginalUrl();
+            // store in redis cache
+            redisTemplate.opsForValue().set(URL_CACHE_PREFIX + shortUrl, originalUrl, Duration.ofMinutes(60));
+            redisTemplate.opsForValue().set(URL_CACHE_PREFIX + originalUrl, shortUrl, Duration.ofMinutes(60));
+        }
         return originalUrl;
     }
 
