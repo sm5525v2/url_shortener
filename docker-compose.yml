@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - JAVA_OPTS=-Xms256m -Xmx512m
+      - CASSANDRA_HOST=cassandra
+      - REDIS_HOST=redis
+    network_mode: "host"
+#    depends_on:
+#      - cassandra
+#      - redis
+
+  frontend:
+    build:
+      context: ./url_shortener_frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+    networks:
+      - mynetwork
+
+#  cassandra:
+#    image: cassandra:latest
+#    container_name: cassandra
+#    ports:
+#      - "9042:9042"
+#    networks:
+#      - mynetwork
+#
+#  redis:
+#    image: redis:latest
+#    container_name: redis
+#    ports:
+#      - "6379:6379"
+#    networks:
+#      - mynetwork
+
+networks:
+  mynetwork:
+    driver: bridge
