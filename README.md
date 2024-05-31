@@ -1,49 +1,64 @@
-# URL Shortener implmentation
+# URL Shortener Implementation
 
 ## Overview
-Frontend: React<br>
-Backend: Spring Boot<br>
-Cache: Redis<br>
-Database: Cassandra<br>
+- **Frontend:** React
+- **Backend:** Spring Boot
+- **Cache:** Redis
+- **Database:** Cassandra
 
-## How to run
-Pull Cassandra, Redis docker images and Run in docker
-```
-Cassandra
+## How to Run
 
-docker run --name cassandra -d -p 9042:9042 cassandra:latest
-docker exec -it cassandra cqlsh
--- Create the keyspace
-CREATE KEYSPACE IF NOT EXISTS url_shortener WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
--- Use the keyspace
-USE url_shortener;
+### Step 1: Set Up Cassandra and Redis Using Docker
 
--- Create the url table
-CREATE TABLE IF NOT EXISTS url (
-    id bigint PRIMARY KEY,
-    originalUrl text,
-    shortUrl text
-);
+1. **Cassandra:**
 
--- add index to original URL for duplicate check
-CREATE INDEX ON url_shortener.url (originalUrl);
-```
-```
-Redis
-docker run -d --name=redis -p 6379:6379 redis
-```
+    Pull the latest Cassandra Docker image and run it:
+    ```sh
+    docker run --name cassandra -d -p 9042:9042 cassandra:latest
+    docker exec -it cassandra cqlsh
+    ```
 
+    Create the keyspace and table:
+    ```sql
+    -- Create the keyspace
+    CREATE KEYSPACE IF NOT EXISTS url_shortener WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};
 
-Build jar file in backend root folder
-```
+    -- Use the keyspace
+    USE url_shortener;
+
+    -- Create the url table
+    CREATE TABLE IF NOT EXISTS url (
+        id bigint PRIMARY KEY,
+        originalUrl text,
+        shortUrl text
+    );
+
+    -- Add index to originalUrl for duplicate check
+    CREATE INDEX ON url_shortener.url (originalUrl);
+    ```
+
+2. **Redis:**
+
+    Pull the latest Redis Docker image and run it:
+    ```sh
+    docker run -d --name=redis -p 6379:6379 redis
+    ```
+
+### Step 2: Build the Backend
+
+Navigate to the backend root folder and build the jar file:
+```sh
 mvn clean install
 ```
+### Step 3: Run the Application
 
-Run docker compose command
-```
+Use Docker Compose to build and run the application:
+
+```sh
 docker-compose up --build
 ```
-
-Frontend will run on localhost:3030
-Backend will run on localhost:8080
+### Access the Application
+- Frontend: http://localhost:3030
+- Backend: http://localhost:8080<br>
+Your URL Shortener application should now be up and running!
 
