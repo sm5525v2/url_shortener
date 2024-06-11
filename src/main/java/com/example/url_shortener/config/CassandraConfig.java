@@ -9,10 +9,15 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.cassandra.config.CqlSessionFactoryBean;
 
+import java.net.InetSocketAddress;
+
 @Configuration
 public class CassandraConfig {
     public @Bean CqlSession session() {
-        return CqlSession.builder().withKeyspace(keyspaceName).build();
+        return CqlSession.builder()
+                .addContactPoint(new InetSocketAddress(contactPoints, port)) // Docker container name or service name
+                .withLocalDatacenter(datacenter)
+                .withKeyspace(keyspaceName).build();
     }
 
     @Value("${spring.data.cassandra.contact-points}")
