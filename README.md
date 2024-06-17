@@ -57,6 +57,24 @@ Use Docker Compose to build and run the application:
 ```sh
 docker-compose up --build
 ```
+
+### Step 4: Run Kafka
+
+1. **Run Kafka:**
+Use Docker Compose to build and run the application:
+
+```sh
+cd kafka
+docker-compose up --build
+```
+2. **Create Kafka Topic:**
+
+```sh
+docker exec -it "kafka_container" /bin/sh
+cd /opt/kafka/bin
+kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --partitions 1 --topic url_received
+```
+
 ### Access the Application
 - Frontend: http://localhost:3030
 - Backend: http://localhost:8080<br>
