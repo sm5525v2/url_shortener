@@ -17,6 +17,9 @@ public class UrlService {
     private UrlRepository urlRepository;
 
     @Autowired
+    private KafkaService kafkaService;
+
+    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
     private static final String URL_CACHE_PREFIX = "URL_";
@@ -41,6 +44,7 @@ public class UrlService {
                 urlRepository.save(Url);
                 redisTemplate.opsForValue().set(URL_CACHE_PREFIX + newShortUrl, originalUrl, Duration.ofMinutes(60));
                 redisTemplate.opsForValue().set(URL_CACHE_PREFIX + originalUrl, newShortUrl, Duration.ofMinutes(60));
+                kafkaService.send("url_received",Url.getOriginalUrl());
                 return newShortUrl;
             }
             shortUrl = existingUrl.get().getShortUrl();

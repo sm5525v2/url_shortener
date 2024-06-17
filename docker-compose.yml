@@ -13,9 +13,9 @@ services:
       - CASSANDRA_HOST=cassandra
       - REDIS_HOST=redis
 #    network_mode: "host"
-    depends_on:
-      - cassandra
-      - redis
+#    depends_on:
+#      - cassandra
+#      - redis
     restart: always
 
   frontend:
