@@ -80,3 +80,28 @@ kafka-topics.sh --create --zookeeper zookeeper:2181 --replication-factor 1 --par
 - Backend: http://localhost:8080<br>
 Your URL Shortener application should now be up and running!
 
+## Performance Testing and Improvements
+
+To ensure the reliability and performance of our URL Shortener Service, I conducted extensive performance testing using JMeter.
+
+### Initial Testing
+
+I tested the URL shortening functionality with 10,000 requests using JMeter. The results showed that approximately 7% of the requests resulted in errors. These errors were primarily due to the response time of Cassandra, the primary database.
+
+### Performance Issue
+
+- **Issue:** Approximately 7% error rate during 10,000 request performance test.
+- **Root Cause:** Cassandra response time.
+
+### Solution: Redis Cache Implementation
+
+To mitigate the performance issues, I implemented Redis as a caching layer. This cache stores the frequently accessed data, significantly reducing the load on Cassandra and improving the response times.
+
+### Results After Implementing Redis Cache
+
+After applying Redis as a caching solution, I re-ran the performance tests. The results were impressive:
+
+- **Error Rate:** 0% during the 10,000 request performance test.
+- **Conclusion:** Implementing Redis cache eliminated the errors caused by Cassandra's response times.
+
+
