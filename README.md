@@ -86,11 +86,11 @@ To ensure the reliability and performance of our URL Shortener Service, I conduc
 
 ### Initial Testing
 
-I tested the URL shortening functionality with 10,000 requests using JMeter. The results showed that approximately 7% of the requests resulted in errors. These errors were primarily due to the response time of Cassandra, the primary database.
+I tested the URL shortening functionality with 10,000 requests / sec using JMeter. The results showed that approximately 7% of the requests resulted in errors. These errors were primarily due to the response time of Cassandra, the primary database.
 
 ### Performance Issue
 
-- **Issue:** Approximately 7% error rate during 10,000 request performance test.
+- **Issue:** Approximately 7% error rate during 10,000 requests / sec performance test.
 - **Root Cause:** Cassandra response time.
 
 ### Solution: Redis Cache Implementation
